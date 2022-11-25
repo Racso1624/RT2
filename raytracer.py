@@ -4,6 +4,7 @@ from vector import *
 from gl import *
 from material import *
 from light import *
+from color import *
 
 max_recursion_depth = 3
 
@@ -12,8 +13,8 @@ class RayTracer(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.clear_color = setColor(0, 0, 0)
-        self.current_color = setColor(1, 1, 1)
+        self.clear_color = Color(0, 0, 0)
+        self.current_color = Color(1, 1, 1)
         self.scene = []
         self.light = None
         self.clear()
@@ -55,11 +56,20 @@ class RayTracer(object):
 
         light_direction = (self.light.position - intersect.point).norm()
         intensity = light_direction @ intersect.normal
+        
+        shade_blast = 1.1
+        shade_origin = intersect.point + (intersect.normal * shade_blast)
+        shade_material, material_intersect = self.scene_intersect(shade_origin, light_direction)
+        shade_intensity = 0
 
-        reflection = (light_direction - (intersect.normal) * (2 * intensity)).norm()
+        if shade_material:
+            shade_intensity = 0.3
 
-        specular_intensity = self.light.intensity * (max(0, (reflection @ direction)) ** material.spec)
+        diffuse = material.diffuse * intensity * material.albedo[0] * (1 - shade_intensity)
 
+
+        light_reflection = (light_direction - (intersect.normal) * (2 * intensity)).norm()
+        specular_intensity = self.light.intensity * (max(0, (light_reflection @ direction)) ** material.spec)
         specular = self.light.c * specular_intensity * material.albedo[1]
 
         if material.albedo[2] > 0:
@@ -68,15 +78,11 @@ class RayTracer(object):
             reflection_origin = intersect.point + (intersect.normal * 1.1)
             reflection_color = self.cast_ray(reflection_origin, reflection_direction, recursion + 1)
         else:
-            reflection_color = setColor(0, 0, 0)
+            reflection_color = Color(0, 0, 0)
 
         reflection = reflection_color * material.albedo[2]
 
-        shade_intensity = 0
-
-        diffuse = material.diffuse * intensity * material.albedo[0] * (1 - shade_intensity)
-
-        return diffuse
+        return diffuse + specular + reflection
 
     def scene_intersect(self, origin, direction):
         zBuffer = 999999

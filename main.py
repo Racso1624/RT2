@@ -1,16 +1,16 @@
 from material import *
 from sphere import *
 from vector import *
-from gl import *
 from raytracer import *
+from color import *
 
-red = Material(difusse=setColor(1, 0, 0))
-white = Material(difusse=setColor(1, 1, 1))
-orange = Material(difusse=setColor(1, 0.5, 0))
-black = Material(difusse=setColor(0, 0, 0))
+red = Material(difusse=Color(255, 0, 0), albedo = [1.3, 0.1, 0], spec = 50)
+white = Material(difusse=Color(255, 255, 255), albedo = [1.3, 0.1, 0], spec = 50)
+orange = Material(difusse=Color(255, 165, 0), albedo = [1.3, 0.1, 0], spec = 50)
+black = Material(difusse=Color(0, 0, 0), albedo = [1.3, 0.1, 0], spec = 50)
 
 r = RayTracer(1024, 1024)
-r.light = Light(V3(0, 0, 0), 1)
+r.light = Light(V3(0, 0, 0), 1, Color(255, 255, 255))
 r.scene = [
     #Nariz
     Sphere(V3(0, -0.9, -8), 0.4, orange),
@@ -36,4 +36,4 @@ r.scene = [
     Sphere(V3(0, 3, -11), 2, white)
 ]
 r.render()
-r.write('RT1.bmp')
+r.write('RT2.bmp')
